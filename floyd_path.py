@@ -24,22 +24,23 @@ def get_distance(source, target):
     return shortest_dis[source][target]
 
 def plan_route(loc, re_to_pick, isEmpty, onboard):
-    REQUESTS = get_value('REQUESTS')
+    # REQUESTS = get_value('REQUESTS')
+    DATA = get_value('DATA')
     origin = []
     destination = []
     if len(re_to_pick) == 1:
         re = re_to_pick[0]
-        origin = REQUESTS[re].origin
+        origin = DATA.loc[re, 'PULocationID']
         if isEmpty:
-            destination = REQUESTS[re].destination
+            destination = DATA.loc[re, 'DOLocationID']
             return_route = []
             return_route += get_route(loc, origin)
             return_route.pop(-1)
             return_route += get_route(origin, destination)
             return return_route.pop(0)
         else:
-            destination.append(REQUESTS[onboard[0]].destination)
-            destination.append(REQUESTS[re].destination)
+            destination.append(DATA.loc[onboard[0], 'DOLocationID'])
+            destination.append(DATA.loc[re, 'DOLocationID'])
             route_all = [[origin, destination[0], destination[1]],
                          [origin, destination[1], destination[0]]]
             s = loc
@@ -63,8 +64,8 @@ def plan_route(loc, re_to_pick, isEmpty, onboard):
             return return_route.pop(0)
     if len(re_to_pick) > 1:
         for re in re_to_pick:
-            origin.append(REQUESTS[re].origin)
-            destination.append(REQUESTS[re].destination)
+            origin.append(DATA.loc[re, 'PULocationID'])
+            destination.append(DATA.loc[re, 'DOLocationID'])
         route_all = [[origin[0], origin[1], destination[0], destination[1]],
                      [origin[1], origin[0], destination[1], destination[0]],
                      [origin[0], origin[1], destination[1], destination[0]],

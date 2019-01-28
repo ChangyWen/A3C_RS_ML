@@ -42,21 +42,23 @@ def initialize():
         #             max_ = len_
         #         print('%i day '%key1,'%i time:' % key2, ':', len_)
         # print('max:', max_)
-        REQUESTS = {}
-        DATA = get_value('DATA')
-        for key1 in request.keys():
-            for key2 in request[key1].keys():
-                for key3 in request[key1][key2].keys():
-                    for index in request[key1][key2][key3]:
-                        request_ins = Request(r_id=index,
-                                              day=DATA.loc[index, 'day'],
-                                              time=DATA.loc[index, 'pickup_time'],
-                                              origin=DATA.loc[index, 'PULocationID'],
-                                              destination=DATA.loc[index, 'DOLocationID'],
-                                              count=DATA.loc[index, 'passenger_count']
-                                              )
-                        REQUESTS[index] = request_ins
-        set_value('REQUESTS', REQUESTS)
+
+        # REQUESTS = {}
+        # DATA = get_value('DATA')
+        # for key1 in request.keys():
+        #     for key2 in request[key1].keys():
+        #         for key3 in request[key1][key2].keys():
+        #             for index in request[key1][key2][key3]:
+        #                 request_ins = Request(r_id=index,
+        #                                       day=DATA.loc[index, 'day'],
+        #                                       time=DATA.loc[index, 'pickup_time'],
+        #                                       origin=DATA.loc[index, 'PULocationID'],
+        #                                       destination=DATA.loc[index, 'DOLocationID'],
+        #                                       count=DATA.loc[index, 'passenger_count']
+        #                                       )
+        #                 REQUESTS[index] = request_ins
+        # set_value('REQUESTS', REQUESTS)
+
     with open('vehicles_df/vehicles_df.csv', 'rb') as vehicle_file:
         vehicle = pd.read_csv(vehicle_file,
                               na_filter=False,

@@ -47,19 +47,20 @@ class Vehicle(object):
         if drive_time - self.loc_time >= t_time:
             self.location = self.route[0]
             self.route.pop(0)
-        REQUESTS = get_value('REQUESTS')
+        # REQUESTS = get_value('REQUESTS')
+        DATA = get_value('DATA')
         temp_onboard = copy.copy(self.onboard)
         for re in temp_onboard:
-            if REQUESTS[re].destination == self.location:
+            if DATA.loc[re, 'DOLocationID'] == self.location:
                 self.onboard.remove(re)
-                self.load -= REQUESTS[re].count
+                self.load -= DATA.loc[re, 'passenger_count']
         temp_re_to_pick = copy.copy(self.re_to_pick)
         for re in temp_re_to_pick:
-            if REQUESTS[re].origin == self.location:
+            if DATA.loc[re, 'PULocationID'] == self.location:
                 self.onboard.append(re)
-                REQUESTS[re].pu_t = current_time
+                # REQUESTS[re].pu_t = current_time
                 self.re_to_pick.remove(re)
-                self.load += REQUESTS[re].count
+                self.load += DATA.loc[re, 'passenger_count']
 
     def update_route(self):
         self.re_to_pick = list(set(self.pick_up) ^ set(self.onboard))

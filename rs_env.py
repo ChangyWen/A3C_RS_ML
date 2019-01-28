@@ -23,7 +23,7 @@ class RideSharing_Env(object):
         self.time = 0
         self.request_selected = []
         self.request_all = copy.deepcopy(get_value('request_all'))
-        self.REQUESTS = copy.deepcopy(get_value('REQUESTS'))
+        # self.REQUESTS = copy.deepcopy(get_value('REQUESTS'))
         self.VEHICLES = copy.deepcopy(get_value('VEHICLES'))
 
     def step(self, action = None):
@@ -35,23 +35,24 @@ class RideSharing_Env(object):
             -> done: flag, true if state_ = terminal and false otherwise
             -> info: information needed
         '''
-        final_action, reward = KM_mapping(action, self.REQUESTS, self.VEHICLES, self.request_selected, self.vehicle, self.time)
+        DATA = get_value('DATA')
+        final_action, reward = KM_mapping(action, self.VEHICLES, self.request_selected, self.vehicle, self.time)
         a = [0] * (VEHICLES_NUMS * REQUEST_NUMS)
         for i, j in final_action:
             ve = self.vehicle[i]
             re = self.request_selected[j]
             a[i * REQUEST_NUMS + j] = 1
             self.VEHICLES[ve].pick_up.append(self.request_selected[re])
-            re_day = self.REQUESTS[self.request_selected[re]].day
-            re_time = self.REQUESTS[self.request_selected[re]].time
-            re_grid = self.REQUESTS[self.request_selected[re]].origin
+            re_day = DATA.loc[re, 'day']
+            re_time = DATA.loc[re, 'pickup_time']
+            re_grid = DATA.loc[re, 'PULocationID']
             if self.VEHICLES[ve].location == re_grid:
-                self.VEHICLES[ve].onboard.append(self.request_selected[re])
-                self.REQUESTS[self.request_selected[re]].pu_t = self.time
-                self.VEHICLES[ve].load += self.REQUESTS[self.request_selected[re]].count
-            self.request_all[re_day][re_time][re_grid].remove(self.request_selected[re])
-            self.VEHICLES[ve].load += self.REQUESTS[self.request_selected[re]].count
-            self.REQUESTS[self.request_selected[re]].served = 1
+                self.VEHICLES[ve].onboard.append(re)
+                # self.REQUESTS[self.request_selected[re]].pu_t = self.time
+                self.VEHICLES[ve].load += DATA.loc[re,'passenger_count']
+            self.request_all[re_day][re_time][re_grid].remove(re)
+            # self.VEHICLES[ve].load += DATA.loc[self.request_selected[re], 'passenger_count']
+            # self.REQUESTS[self.request_selected[re]].served = 1
             self.VEHICLES[ve].update_route()
         self.request_selected = []
         self.vehicle = []
@@ -84,9 +85,9 @@ class RideSharing_Env(object):
             self.request_selected += [-1] * (REQUEST_NUMS - len(self.request_selected))
         for index in self.request_selected:
             if index != -1:
-                request_state += [self.REQUESTS[index].origin,
-                                  self.REQUESTS[index].destination,
-                                  self.REQUESTS[index].count]
+                request_state += [DATA.loc[index, 'PULocationID'],
+                                  DATA.loc[index, 'DOLocationID'],
+                                  DATA.loc[index, 'passenger_count']]
             else:
                 request_state += [0, 0, 0]
         '''
@@ -123,6 +124,7 @@ class RideSharing_Env(object):
         '''
             select M requests
         '''
+        DATA = get_value('DATA')
         for grid in self.request_all[day][0].keys():
             self.request_selected += self.request_all[day][0][grid]
         if self.day > 1:
@@ -137,9 +139,9 @@ class RideSharing_Env(object):
             self.request_selected += [-1] * (REQUEST_NUMS - len(self.request_selected))
         for index in self.request_selected:
             if index != -1:
-                request_state += [self.REQUESTS[index].origin,
-                                  self.REQUESTS[index].destination,
-                                  self.REQUESTS[index].count]
+                request_state += [DATA.loc[index, 'PULocationID'],
+                                  DATA.loc[index, 'DOLocationID'],
+                                  DATA.loc[index, 'passenger_count']]
             else:
                 request_state += [0, 0, 0]
         '''
