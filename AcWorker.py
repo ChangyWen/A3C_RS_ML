@@ -38,6 +38,7 @@ class Worker(object):
             ep_r = 0 ### episode reward in local_net
             for ep_t in range(MAX_EP_STEP):
                 a_temp = self.AC.choose_action(s)
+                print('name:', self.name, ': step %i' % ep_t)
                 a, s_, r, done, info = self.env.step(a_temp)
                 done = True if ep_t == MAX_EP_STEP - 1 else False
                 ep_r += r

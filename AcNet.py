@@ -82,7 +82,7 @@ class AcNet(object):
                                        name = 'layer_a2')
             a_prob = tf.layers.dense(inputs=layer_a2,
                                      units=N_A,   ### N_A = M*N
-                                     activation=tf.nn.tanh,
+                                     activation=tf.nn.sigmoid,
                                      kernel_initializer=W_INIT,
                                      name = 'a_prob')
         with tf.variable_scope('critic'):

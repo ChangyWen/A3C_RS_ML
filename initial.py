@@ -43,22 +43,6 @@ def initialize():
         #         print('%i day '%key1,'%i time:' % key2, ':', len_)
         # print('max:', max_)
 
-        # REQUESTS = {}
-        # DATA = get_value('DATA')
-        # for key1 in request.keys():
-        #     for key2 in request[key1].keys():
-        #         for key3 in request[key1][key2].keys():
-        #             for index in request[key1][key2][key3]:
-        #                 request_ins = Request(r_id=index,
-        #                                       day=DATA.loc[index, 'day'],
-        #                                       time=DATA.loc[index, 'pickup_time'],
-        #                                       origin=DATA.loc[index, 'PULocationID'],
-        #                                       destination=DATA.loc[index, 'DOLocationID'],
-        #                                       count=DATA.loc[index, 'passenger_count']
-        #                                       )
-        #                 REQUESTS[index] = request_ins
-        # set_value('REQUESTS', REQUESTS)
-
     with open('vehicles_df/vehicles_df.csv', 'rb') as vehicle_file:
         vehicle = pd.read_csv(vehicle_file,
                               na_filter=False,
@@ -72,7 +56,7 @@ def initialize():
                                      'start_time':np.int,
                                      'stop_time':np.int,
                                      },
-                              nrows=VEHICLES_NUMS,
+                              nrows=TOTAL_VEHICLES_NUMS,
                               )
         VEHICLES = []
         for i in range(len(vehicle)):
@@ -82,6 +66,22 @@ def initialize():
                                   stop_time=vehicle.loc[i, 'stop_time'])
             VEHICLES.append(vehicle_ins)
         set_value('VEHICLES', VEHICLES)
-    return request
-    ### Reduce to N and M
+        # print(len(VEHICLES))
+    with open('vehicle_dict/vehicle_dict.pkl', 'rb') as vehicle_dict_file:
+        vehicle_dict = pickle.load(vehicle_dict_file)
+        set_value('vehicle_serve', vehicle_dict)
+
+
+# def test():
+#     with open('models/fare_model/fare_model.csv', 'rb') as fare_file:
+#         fare = np.loadtxt(fname=fare_file,
+#                           delimiter=",",
+#                       skiprows=0,)
+#         set_value('fare', fare)
+#         max = 0
+#         for i in range(1,266):
+#             for j in range(1,266):
+#                 max = fare[i][j] if fare[i][j] > max else max
+#         print(max)
+# test()
 # initialize()

@@ -16,7 +16,8 @@ A_BOUND = []
 MAX_DETOUR_TIME = 25
 GRID_NUMS = 265
 REQUEST_NUMS = 3000
-VEHICLES_NUMS = 10000 # 13,586
+VEHICLES_NUMS = 6312 # 13,586
+TOTAL_VEHICLES_NUMS = 10000
 
 global_dict = {'SESS':None,
                'OPT_A':None,
@@ -28,6 +29,7 @@ global_dict = {'SESS':None,
                'REQUESTS':None,
                'VEHICLES':None,
                'request_all':None,
+               'vehicle_serve':None,
                'travel_time':None,
                'fare':None,
                'shortest_dis':None,

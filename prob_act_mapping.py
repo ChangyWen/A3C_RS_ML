@@ -5,7 +5,7 @@ from munkres import Munkres, print_matrix, make_cost_matrix, DISALLOWED
 from sys import maxsize
 import numpy as np
 from global_parameters import VEHICLES_NUMS, REQUEST_NUMS, get_value, MAX_DETOUR_TIME
-
+import copy
 
 def cal_profit(VEHICLES, request_selected, vehicle, current_time):
     DATA = get_value('DATA')
@@ -30,27 +30,27 @@ def KM_mapping(action, VEHICLES, request_selected, vehicle, current_time): # ???
     :param prob_weights: a_prob
     :return: matching final action,"indexes":
     '''
-    # prob_weights = [5, DISALLOWED, 70, 0,
-    #           10, 3, 2, 3,
-    #           9, DISALLOWED, 4, 5,
-    #             1,2,3,4,
-    #                 90,5,1,DISALLOWED]
+    print('cal_profit begin')
     profit_matrix = cal_profit(VEHICLES, request_selected, vehicle, current_time)
-    km_matrix = profit_matrix * action.reshape([VEHICLES_NUMS,REQUEST_NUMS])
-    km_weights = make_cost_matrix(km_matrix, lambda item: (maxsize - item) if item != 0 else DISALLOWED)
-    # matrix = np.array(prob_weights)
-    # matrix = np.reshape(matrix, [VEHICLES_NUMS, REQUEST_NUMS])
-    # matrix = matrix.transpose()
-    # cost_matrix = make_cost_matrix(matrix, lambda cost: (maxsize - cost) if (cost != DISALLOWED) else DISALLOWED)
+    print('cal_profit end')
+    action = action.reshape([1,VEHICLES_NUMS * REQUEST_NUMS])
+    action = np.apply_along_axis(lambda x: round(x[0], 2), 0, action)
+    action_weights = action.reshape([VEHICLES_NUMS,REQUEST_NUMS])
+    km_matrix = profit_matrix * action_weights
+    # km_weights = make_cost_matrix(km_matrix, lambda item: (maxsize - item) if item != 0 else DISALLOWED)
+    km_weights = make_cost_matrix(km_matrix, lambda item: (400 - item))
     m = Munkres()
+    print('km begin')
     indexes = m.compute(km_weights)
+    print('km_end')
     print_matrix(profit_matrix, msg='Highers profit through this matrix:')
     total = 0
-    for row, column in indexes:
-        # print(row, column)
+    temp_indexes = copy.deepcopy(indexes)
+    for row, column in temp_indexes:
         value = profit_matrix[row][column]
+        if value == 0:
+            indexes.remove((row, column))
         total += value
-        # print('(%d, %d) -> %d' % (row, column, value))
-        # print('total profit: %d' % total)
     return indexes, total
+
 # KM_mapping([])

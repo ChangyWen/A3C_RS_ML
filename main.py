@@ -26,9 +26,8 @@ if __name__ == "__main__":
     print(N_WORKERS)
     set_value('DATA', DATA)
     print('point1: initialize begin')
-    request_all = initial.initialize()
+    initial.initialize()
     print('point2: initialize end')
-    set_value('request_all', request_all)
     with tf.device("/cpu:0"):
         set_value('OPT_A', tf.train.RMSPropOptimizer(LR_A, name='RMSProp_A'))
         set_value('OPT_C', tf.train.RMSPropOptimizer(LR_C, name='RMSProp_C'))

@@ -36,7 +36,9 @@ class RideSharing_Env(object):
             -> info: information needed
         '''
         DATA = get_value('DATA')
+        print('KM_mapping begin')
         final_action, reward = KM_mapping(action, self.VEHICLES, self.request_selected, self.vehicle, self.time)
+        print('KM_mapping done')
         a = [0] * (VEHICLES_NUMS * REQUEST_NUMS)
         for i, j in final_action:
             ve = self.vehicle[i]
@@ -48,20 +50,21 @@ class RideSharing_Env(object):
             re_grid = DATA.loc[re, 'PULocationID']
             if self.VEHICLES[ve].location == re_grid:
                 self.VEHICLES[ve].onboard.append(re)
-                # self.REQUESTS[self.request_selected[re]].pu_t = self.time
                 self.VEHICLES[ve].load += DATA.loc[re,'passenger_count']
             self.request_all[re_day][re_time][re_grid].remove(re)
-            # self.VEHICLES[ve].load += DATA.loc[self.request_selected[re], 'passenger_count']
-            # self.REQUESTS[self.request_selected[re]].served = 1
+            print('vehicle update route begin')
             self.VEHICLES[ve].update_route()
+            print('vehicle update route end')
         self.request_selected = []
         self.vehicle = []
         request_state = []
         vehicle_state = []
         self.time += 1
         step_time = 0 if self.time == 1440 else self.time
+        print('vehicle step begin')
         for ve in self.vehicle:
             self.VEHICLES[ve].step(step_time)
+        print('vehicle step end')
         if self.time == 1440:
             done = True
             info = None
@@ -93,18 +96,14 @@ class RideSharing_Env(object):
         '''
             select N vehicles, vehicle_state consider the next grid the car going to ???
         '''
-        for i in range(len(self.VEHICLES)):
-            if (self.VEHICLES[i].stop_time < self.VEHICLES[i].start_time and self.VEHICLES[i].stop_time >= self.time) \
-                    or (self.VEHICLES[i].start_time < self.VEHICLES[i].stop_time and (self.VEHICLES[i].start_time <= self.time and self.VEHICLES[i].stop_time >= self.time)):
-                if self.VEHICLES[i].load < self.VEHICLES[i].cap:
-                    self.VEHICLES[i].serving = 1
-                    self.vehicle.append(i)
-                    vehicle_state += [self.VEHICLES[i].location, self.VEHICLES[i].cap - self.VEHICLES[i].load]
-                else:
-                    vehicle_state += [0, 0]
-            else:
-                vehicle_state += [0, 0]
-        state_ = np.concatenate(([self.day], [0], request_state, vehicle_state))
+        vehicle_serve = get_value('vehicle_serve')
+        for i in vehicle_serve[self.time]:
+            if self.VEHICLES[i].load < self.VEHICLES[i].cap:
+                self.VEHICLES[i].serving = 1
+                self.vehicle.append(i)
+                vehicle_state += [self.VEHICLES[i].location, self.VEHICLES[i].cap - self.VEHICLES[i].load]
+        vehicle_state += [0, 0] * (VEHICLES_NUMS - len(self.vehicle))
+        state_ = np.concatenate(([self.day], [self.time], request_state, vehicle_state))
         done = False if self.time < 1440 else True
         info = None
         return a, state_, reward, done, info
@@ -147,15 +146,12 @@ class RideSharing_Env(object):
         '''
             select N vehicles, vehicle_state consider the next grid the car going to ???
         '''
-        for i in range(len(self.VEHICLES)):
-            if self.VEHICLES[i].stop_time < self.VEHICLES[i].start_time or self.VEHICLES[i].start_time == 0:
-                if self.VEHICLES[i].load < self.VEHICLES[i].cap:
-                    self.VEHICLES[i].serving = 1
-                    self.vehicle.append(i)
-                    vehicle_state += [self.VEHICLES[i].location, self.VEHICLES[i].cap - self.VEHICLES[i].load]
-                else:
-                    vehicle_state += [0, 0]
-            else:
-                vehicle_state += [0, 0]
+        vehicle_serve = get_value('vehicle_serve')
+        for i in vehicle_serve[0]:
+            if self.VEHICLES[i].load < self.VEHICLES[i].cap:
+                self.VEHICLES[i].serving = 1
+                self.vehicle.append(i)
+                vehicle_state += [self.VEHICLES[i].location, self.VEHICLES[i].cap - self.VEHICLES[i].load]
+        vehicle_state += [0, 0] * (VEHICLES_NUMS - len(self.vehicle))
         state = np.concatenate(([self.day], [0], request_state, vehicle_state))
         return state
